@@ -81,12 +81,13 @@ class Jogo {
   adicionarNumeroSorteado(numeroSorteado: NumeroSorteado): void {
     this.numerosSorteados.push(numeroSorteado);
   }
-
   removerUltimoNumeroSorteado(): void {
     this.numerosSorteados.pop();
   }
 
-  jogarNumero(valorSorteado: number) {
+  public jogarNumero(valorSorteado: number): {
+    foiBingo: boolean;
+  } {
     /**
      * Verificar se valor sorteado é um número e não está vazio
      */
@@ -120,9 +121,15 @@ class Jogo {
       );
     }
     this.adicionarNumeroSorteado(novoNumeroSorteado);
+
+    const considerouBingo: boolean = this.verificarSeBingo();
+
+    return {
+      foiBingo: considerouBingo,
+    };
   }
 
-  desfazerUltimoNumeroJogado() {
+  public desfazerUltimoNumeroJogado() {
     if (this.numerosSorteados.length == 0) {
       return;
     }
@@ -136,6 +143,105 @@ class Jogo {
         ultimoNumeroSorteado.getIndiceCampo()
       ].atualizarMarcado(false);
     }
+  }
+
+  public verificarSeBingo(): boolean {
+    let bingoPorTabelaToda = false;
+    if (this.regras.getTabelaMarcada()) {
+      bingoPorTabelaToda = this.verificarSeBingoPorTabelaToda();
+    }
+
+    let bingoPorColuna = false;
+    if (this.regras.getColunaMarcada()) {
+      bingoPorColuna = this.verificarSeBingoPorColuna();
+    }
+
+    let bingoPorLinha = false;
+    if (this.regras.getLinhaMarcada()) {
+      bingoPorColuna = this.verificarSeBingoPorLinha();
+    }
+
+    if (bingoPorTabelaToda || bingoPorColuna || bingoPorLinha) {
+      return true;
+    }
+
+    return false;
+  }
+
+  private verificarSeBingoPorTabelaToda(): boolean {
+    let foiBingo: boolean = true;
+    for (let i = 0; i < this.tabela.getQuantidadeCamposTabela(); i++) {
+      if (this.tabela.campos[i].getConsiderar()) {
+        if (!this.tabela.campos[i].getMarcado()) {
+          foiBingo = false;
+        }
+      }
+    }
+    return foiBingo;
+  }
+
+  private verificarSeBingoPorColuna(): boolean {
+    let foiBingo: boolean = true;
+
+    /**
+     * Inicializa verificador de cada coluna como true
+     */
+    let colunas: boolean[] = [];
+    for (let i = 0; i < this.tabela.getQuantidadeColunas(); i++) {
+      colunas.push(true);
+    }
+
+    for (let i = 0; i < this.tabela.getQuantidadeColunas(); i++) {
+      let colunaTodaMarcada = true;
+
+      for (let j = 0; j < this.tabela.getQuantidadeLinhas(); j++) {
+        if (this.tabela.campos[i * j].getConsiderar()) {
+          if (!this.tabela.campos[i * j].getMarcado()) {
+            colunaTodaMarcada = false;
+          }
+        }
+
+        colunas[i] = colunaTodaMarcada;
+      }
+    }
+
+    if (colunas.filter((coluna) => !coluna).length > 0) {
+      foiBingo = false;
+    }
+
+    return foiBingo;
+  }
+
+  private verificarSeBingoPorLinha(): boolean {
+    let foiBingo: boolean = true;
+
+    /**
+     * Inicializa verificador de cada linha como true
+     */
+    let linhasMarcadas: boolean[] = [];
+    for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
+      linhasMarcadas.push(true);
+    }
+
+    for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
+      let linhaTodaMarcada = true;
+
+      for (let j = 0; j < this.tabela.getQuantidadeColunas(); j++) {
+        if (this.tabela.campos[i * j].getConsiderar()) {
+          if (!this.tabela.campos[i * j].getMarcado()) {
+            linhaTodaMarcada = false;
+          }
+        }
+
+        linhasMarcadas[i] = linhaTodaMarcada;
+      }
+    }
+
+    if (linhasMarcadas.filter((linha) => !linha).length > 0) {
+      foiBingo = false;
+    }
+
+    return foiBingo;
   }
 }
 

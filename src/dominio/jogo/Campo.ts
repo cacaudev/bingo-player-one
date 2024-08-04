@@ -4,23 +4,23 @@ class Campo {
   private readonly indice: number;
   private valor: ValorCampo;
   private marcado: boolean;
-  private naoConsiderar: boolean;
+  private considerar: boolean;
 
   public constructor(
     indice: number,
     valor: ValorCampo,
     marcado: boolean = false,
-    naoConsiderar = false
+    considerar = true
   ) {
     Campo.verificarIndice(indice);
     Campo.verificarValorInicial(valor);
     Campo.verificarMarcado(marcado);
-    Campo.verificarNaoConsiderar(naoConsiderar);
+    Campo.verificarConsiderar(considerar);
 
     this.indice = indice;
     this.valor = valor;
-    this.marcado = naoConsiderar ? true : marcado;
-    this.naoConsiderar = naoConsiderar;
+    this.marcado = considerar ? marcado : true;
+    this.considerar = considerar;
   }
 
   public verificarValorFinal(): boolean {
@@ -37,7 +37,7 @@ class Campo {
       );
     }
   }
-  
+
   private static verificarIndice(indice: number): void {
     if (indice == null || indice === undefined || indice < 0) {
       throw new Error("Atributo indice do campo não pode estar vazio.");
@@ -48,9 +48,9 @@ class Campo {
       throw new Error("Atributo marcado do campo não pode estar vazio.");
     }
   }
-  private static verificarNaoConsiderar(regra: boolean): void {
+  private static verificarConsiderar(regra: boolean): void {
     if (regra == null || regra === undefined) {
-      throw new Error("Atributo não considerar do campo não pode estar vazio.");
+      throw new Error("Atributo considerar do campo não pode estar vazio.");
     }
   }
 
@@ -63,8 +63,8 @@ class Campo {
   public getMarcado(): boolean {
     return this.marcado;
   }
-  public getNaoConsiderar(): boolean {
-    return this.naoConsiderar;
+  public getConsiderar(): boolean {
+    return this.considerar;
   }
   public getIndice(): number {
     return this.indice;
@@ -81,9 +81,9 @@ class Campo {
     Campo.verificarMarcado(marcado);
     this.marcado = marcado;
   }
-  public atualizarNaoConsiderar(regra: boolean) {
-    Campo.verificarNaoConsiderar(regra);
-    this.naoConsiderar = regra;
+  public atualizarConsiderar(regra: boolean) {
+    Campo.verificarConsiderar(regra);
+    this.considerar = regra;
   }
 }
 

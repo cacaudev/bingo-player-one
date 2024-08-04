@@ -111,7 +111,7 @@ class Tabela {
 
     for (let i = 0; i < this.getQuantidadeCamposTabela(); i++) {
       if (
-        !this.campos[i].getNaoConsiderar() &&
+        !this.campos[i].getConsiderar() &&
         this.campos[i].getValor() === valor
       ) {
         return true;
