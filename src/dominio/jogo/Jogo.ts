@@ -1,4 +1,5 @@
 import Campo from "./Campo";
+import IndiceCampo from "./IndiceCampo";
 import NumeroSorteado from "./NumeroSorteado";
 import RegrasBingo from "./RegrasBingo";
 import Tabela from "./Tabela";
@@ -70,9 +71,7 @@ class Jogo {
    * Reseta o status de marcado de todos os campos para valor inicial false
    */
   resetarJogo(): void {
-    for (let i = 0; i < this.tabela.getQuantidadeCamposTabela(); i++) {
-      this.tabela.campos[i].atualizarMarcado(false);
-    }
+    this.tabela.resetarMarcacaoDeTodosOsCampos();
     this.numerosSorteados = [];
   }
 
@@ -89,22 +88,26 @@ class Jogo {
 
   public jogarNumero(valorSorteado: number): {
     foiBingo: boolean;
+    foiAchado: boolean;
+    indiceCampo: IndiceCampo;
   } {
     /**
      * Verificar se valor sorteado é um número e não está vazio
      */
-    new Campo(0, valorSorteado, false);
+    NumeroSorteado.verificarNumero(valorSorteado);
     let numeroFoiAchadoNaTabela = false;
-    let indiceDoCampoOndeNumeroFoiAchado: number = -1;
+    let indiceDoCampoOndeNumeroFoiAchado: IndiceCampo = new IndiceCampo(-1, -1);
 
-    for (let i = 0; i < this.tabela.getQuantidadeCamposTabela(); i++) {
-      if (
-        this.tabela.campos[i].getValor() == valorSorteado &&
-        !this.tabela.campos[i].getMarcado()
-      ) {
-        this.tabela.campos[i].atualizarMarcado(true);
-        numeroFoiAchadoNaTabela = true;
-        indiceDoCampoOndeNumeroFoiAchado = i;
+    for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
+      for (let j = 0; j < this.tabela.getQuantidadeColunas(); j++) {
+        if (
+          this.tabela.campos[i][j].getValor() == valorSorteado &&
+          !this.tabela.campos[i][j].getMarcado()
+        ) {
+          this.tabela.campos[i][j].atualizarMarcado(true);
+          numeroFoiAchadoNaTabela = true;
+          indiceDoCampoOndeNumeroFoiAchado = new IndiceCampo(i, j);
+        }
       }
     }
 
@@ -128,6 +131,8 @@ class Jogo {
 
     return {
       foiBingo: considerouBingo,
+      foiAchado: numeroFoiAchadoNaTabela,
+      indiceCampo: indiceDoCampoOndeNumeroFoiAchado,
     };
   }
 
@@ -139,10 +144,10 @@ class Jogo {
       this.numerosSorteados[this.numerosSorteados.length - 1];
     if (
       ultimoNumeroSorteado.getAchado() &&
-      ultimoNumeroSorteado.getIndiceCampo() != -1
+      ultimoNumeroSorteado.getIndiceCampo().getX() != -1
     ) {
-      this.tabela.campos[
-        ultimoNumeroSorteado.getIndiceCampo()
+      this.tabela.campos[ultimoNumeroSorteado.getIndiceCampo().getX()][
+        ultimoNumeroSorteado.getIndiceCampo().getY()
       ].atualizarMarcado(false);
     }
   }
@@ -172,10 +177,12 @@ class Jogo {
 
   private verificarSeBingoPorTabelaToda(): boolean {
     let foiBingo: boolean = true;
-    for (let i = 0; i < this.tabela.getQuantidadeCamposTabela(); i++) {
-      if (this.tabela.campos[i].getConsiderar()) {
-        if (!this.tabela.campos[i].getMarcado()) {
-          foiBingo = false;
+    for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
+      for (let j = 0; j < this.tabela.getQuantidadeColunas(); j++) {
+        if (this.tabela.campos[i][j].getConsiderar()) {
+          if (!this.tabela.campos[i][j].getMarcado()) {
+            foiBingo = false;
+          }
         }
       }
     }
@@ -189,60 +196,47 @@ class Jogo {
      * Inicializa verificador de cada coluna como true
      */
     let colunas: boolean[] = [];
-    for (let i = 0; i < this.tabela.getQuantidadeColunas(); i++) {
-      colunas.push(true);
-    }
 
-    for (let i = 0; i < this.tabela.getQuantidadeColunas(); i++) {
+    for (let j = 0; j < this.tabela.getQuantidadeColunas(); j++) {
       let colunaTodaMarcada = true;
 
-      for (let j = 0; j < this.tabela.getQuantidadeLinhas(); j++) {
-        if (this.tabela.campos[i * j].getConsiderar()) {
-          if (!this.tabela.campos[i * j].getMarcado()) {
+      for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
+        if (this.tabela.campos[i][j].getConsiderar()) {
+          if (!this.tabela.campos[i][j].getMarcado()) {
             colunaTodaMarcada = false;
           }
         }
-
-        colunas[i] = colunaTodaMarcada;
       }
+      colunas.push(colunaTodaMarcada);
     }
 
     if (colunas.filter((coluna) => !coluna).length > 0) {
       foiBingo = false;
     }
-
     return foiBingo;
   }
 
   private verificarSeBingoPorLinha(): boolean {
     let foiBingo: boolean = true;
-
-    /**
-     * Inicializa verificador de cada linha como true
-     */
     let linhasMarcadas: boolean[] = [];
-    for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
-      linhasMarcadas.push(true);
-    }
 
     for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
       let linhaTodaMarcada = true;
 
       for (let j = 0; j < this.tabela.getQuantidadeColunas(); j++) {
-        if (this.tabela.campos[i * j].getConsiderar()) {
-          if (!this.tabela.campos[i * j].getMarcado()) {
+        if (this.tabela.campos[i][j].getConsiderar()) {
+          if (!this.tabela.campos[i][j].getMarcado()) {
             linhaTodaMarcada = false;
           }
         }
 
-        linhasMarcadas[i] = linhaTodaMarcada;
+        linhasMarcadas.push(linhaTodaMarcada);
       }
     }
 
     if (linhasMarcadas.filter((linha) => !linha).length > 0) {
       foiBingo = false;
     }
-
     return foiBingo;
   }
 }

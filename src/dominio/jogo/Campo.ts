@@ -30,7 +30,6 @@ class Campo {
     }
     return true;
   }
-
   private static verificarValorInicial(valor: ValorCampo): void {
     if (valor === undefined) {
       throw new Error(
@@ -38,7 +37,6 @@ class Campo {
       );
     }
   }
-
   
   private static verificarMarcado(marcado: boolean): void {
     if (marcado == null || marcado === undefined) {

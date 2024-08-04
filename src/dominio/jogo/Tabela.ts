@@ -1,9 +1,10 @@
 import Campo, { ValorCampo } from "./Campo";
+import IndiceCampo from "./IndiceCampo";
 
 class Tabela {
   private readonly quantidadeColunas: number;
   private readonly quantidadeLinhas: number;
-  public readonly campos: Campo[];
+  public readonly campos: Campo[][];
   private tabelaValidada: boolean;
 
   constructor(quantidadeColunas: number, quantidadeLinhas: number) {
@@ -13,9 +14,10 @@ class Tabela {
     this.quantidadeColunas = quantidadeColunas;
     this.quantidadeLinhas = quantidadeLinhas;
     this.tabelaValidada = false;
-
-    const numeroCampos = quantidadeColunas * quantidadeColunas;
-    this.campos = Tabela.gerarTabelaInicial(numeroCampos);
+    this.campos = Tabela.gerarTabelaInicial(
+      quantidadeColunas,
+      quantidadeLinhas
+    );
   }
 
   /**
@@ -38,7 +40,7 @@ class Tabela {
   private static verificarQuantidadeColunas(quantidadeColunas: number): void {
     const isVazio = (valor: number): boolean =>
       valor == null || valor == undefined;
-    const minimoColunas = 3;
+    const minimoColunas = 2;
     const maximoColunas = 5;
 
     if (isVazio(quantidadeColunas)) {
@@ -63,7 +65,7 @@ class Tabela {
   private static verificarQuantidadeLinhas(quantidadeLinhas: number): void {
     const isVazio = (valor: number): boolean =>
       valor == null || valor == undefined;
-    const minimoLinhas = 3;
+    const minimoLinhas = 2;
     const maximoLinhas = 5;
 
     if (isVazio(quantidadeLinhas)) {
@@ -81,10 +83,19 @@ class Tabela {
     }
   }
 
-  private static gerarTabelaInicial(numeroCampos: number): Campo[] {
-    const novosCampos: Campo[] = [];
-    for (let i = 0; i < numeroCampos; i++) {
-      novosCampos.push(new Campo(i, null, false));
+  private static gerarTabelaInicial(
+    quantidadeColunas: number,
+    quantidadeLinhas: number
+  ): Campo[][] {
+    const novosCampos = [];
+    for (let i = 0; i < quantidadeLinhas; i++) {
+      let novaLinha: Campo[] = [];
+
+      for (let j = 0; j < quantidadeColunas; j++) {
+        novaLinha.push(new Campo(new IndiceCampo(i, j), null, false));
+      }
+
+      novosCampos.push(novaLinha);
     }
     return novosCampos;
   }
@@ -94,11 +105,13 @@ class Tabela {
   }
 
   public validarTabela(): void {
-    for (let i = 0; i < this.getQuantidadeCamposTabela(); i++) {
-      if (!this.campos[i].verificarValorFinal()) {
-        throw new Error(
-          "Valor de um dos campos da tabela é inválido ou está vazio."
-        );
+    for (let i = 0; i < this.getQuantidadeLinhas(); i++) {
+      for (let j = 0; j < this.getQuantidadeColunas(); j++) {
+        if (!this.campos[i][j].verificarValorFinal()) {
+          throw new Error(
+            "Valor de um dos campos da tabela é inválido ou está vazio."
+          );
+        }
       }
     }
     this.tabelaValidada = true;
@@ -109,12 +122,14 @@ class Tabela {
       return false;
     }
 
-    for (let i = 0; i < this.getQuantidadeCamposTabela(); i++) {
-      if (
-        !this.campos[i].getConsiderar() &&
-        this.campos[i].getValor() === valor
-      ) {
-        return true;
+    for (let i = 0; i < this.getQuantidadeLinhas(); i++) {
+      for (let j = 0; j < this.getQuantidadeColunas(); j++) {
+        if (
+          !this.campos[i][j].getConsiderar() &&
+          this.campos[i][j].getValor() === valor
+        ) {
+          return true;
+        }
       }
     }
     return false;
@@ -122,10 +137,18 @@ class Tabela {
 
   public atualizarCampo(campoAtualizado: Campo) {
     if (this.verificarSeValorJaExisteNaTabela(campoAtualizado.getValor())) {
-      throw new Error('Valor já existe na tabela.');
+      throw new Error("Valor já existe na tabela.");
     }
     const indice = campoAtualizado.getIndice();
-    this.campos[indice] = campoAtualizado;
+    this.campos[indice.getX()][indice.getY()] = campoAtualizado;
+  }
+
+  public resetarMarcacaoDeTodosOsCampos() {
+    for (let i = 0; i < this.getQuantidadeLinhas(); i++) {
+      for (let j = 0; j < this.getQuantidadeColunas(); j++) {
+        this.campos[i][j].atualizarMarcado(false);
+      }
+    }
   }
 }
 

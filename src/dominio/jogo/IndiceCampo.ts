@@ -1,6 +1,6 @@
 class IndiceCampo {
-  private readonly x: number;
-  private readonly y: number;
+  private readonly x: number; // LINHA
+  private readonly y: number; // COLUNA
 
   constructor(x: number, y: number) {
     this.verificarIndice(x);
@@ -18,8 +18,8 @@ class IndiceCampo {
   }
 
   private verificarIndice(indice: number): void {
-    if (indice == null || indice === undefined || indice < 0) {
-      throw new Error("Atributo indice do campo não pode estar vazio.");
+    if (indice == null || indice === undefined || indice < -1) {
+      throw new Error("Atributo indice do campo não pode estar vazio ou ser negativo.");
     }
   }
 }
