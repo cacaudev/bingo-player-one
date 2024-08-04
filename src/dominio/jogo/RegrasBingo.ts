@@ -31,14 +31,24 @@ class RegrasBingo {
   public atualizarLinhaMarcada(regraAtualizada: boolean) {
     this.verificarRegra(regraAtualizada);
     this.linhaMarcada = regraAtualizada;
+    if (regraAtualizada) {
+      this.tabelaMarcada = false;
+    }
   }
   public atualizarColunaMarcada(regraAtualizada: boolean) {
     this.verificarRegra(regraAtualizada);
     this.colunaMarcada = regraAtualizada;
+    if (regraAtualizada) {
+      this.tabelaMarcada = false;
+    }
   }
   public atualizarTabelaMarcada(regraAtualizada: boolean) {
     this.verificarRegra(regraAtualizada);
     this.tabelaMarcada = regraAtualizada;
+    if (regraAtualizada) {
+      this.colunaMarcada = false;
+      this.linhaMarcada = false;
+    }
   }
 
   private verificarRegra(regraAtualizada: boolean) {

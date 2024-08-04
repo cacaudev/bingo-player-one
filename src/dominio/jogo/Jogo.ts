@@ -1,3 +1,5 @@
+import Campo from "./Campo";
+import NumeroSorteado from "./NumeroSorteado";
 import RegrasBingo from "./RegrasBingo";
 import Tabela from "./Tabela";
 
@@ -7,6 +9,7 @@ class Jogo {
 
   public readonly tabela: Tabela;
   public regras: RegrasBingo;
+  public numerosSorteados: NumeroSorteado[];
 
   constructor(
     nomeJogo: string,
@@ -18,6 +21,7 @@ class Jogo {
     this.nome = nomeJogo;
     this.tabela = new Tabela(quantidadeColunas, quantidadeLinhas);
     this.regras = new RegrasBingo();
+    this.numerosSorteados = [];
   }
 
   /**
@@ -64,8 +68,73 @@ class Jogo {
    * Reseta o status de marcado de todos os campos para valor inicial false
    */
   resetarJogo(): void {
-    for (let i = 0; i < this.tabela.getNumeroCamposJogo(); i++) {
+    for (let i = 0; i < this.tabela.getQuantidadeCamposTabela(); i++) {
       this.tabela.campos[i].atualizarMarcado(false);
+    }
+    this.numerosSorteados = [];
+  }
+
+  validarTabelaParaIniciarJogo(): void {
+    this.tabela.validarTabela();
+  }
+
+  adicionarNumeroSorteado(numeroSorteado: NumeroSorteado): void {
+    this.numerosSorteados.push(numeroSorteado);
+  }
+
+  removerUltimoNumeroSorteado(): void {
+    this.numerosSorteados.pop();
+  }
+
+  jogarNumero(valorSorteado: number) {
+    /**
+     * Verificar se valor sorteado é um número e não está vazio
+     */
+    new Campo(0, valorSorteado, false);
+    let numeroFoiAchadoNaTabela = false;
+    let indiceDoCampoOndeNumeroFoiAchado: number = -1;
+
+    for (let i = 0; i < this.tabela.getQuantidadeCamposTabela(); i++) {
+      if (
+        this.tabela.campos[i].getValor() == valorSorteado &&
+        !this.tabela.campos[i].getMarcado()
+      ) {
+        this.tabela.campos[i].atualizarMarcado(true);
+        numeroFoiAchadoNaTabela = true;
+        indiceDoCampoOndeNumeroFoiAchado = i;
+      }
+    }
+
+    let novoNumeroSorteado: NumeroSorteado;
+
+    if (numeroFoiAchadoNaTabela) {
+      novoNumeroSorteado = new NumeroSorteado(
+        valorSorteado,
+        numeroFoiAchadoNaTabela,
+        indiceDoCampoOndeNumeroFoiAchado
+      );
+    } else {
+      novoNumeroSorteado = new NumeroSorteado(
+        valorSorteado,
+        numeroFoiAchadoNaTabela
+      );
+    }
+    this.adicionarNumeroSorteado(novoNumeroSorteado);
+  }
+
+  desfazerUltimoNumeroJogado() {
+    if (this.numerosSorteados.length == 0) {
+      return;
+    }
+    let ultimoNumeroSorteado: NumeroSorteado =
+      this.numerosSorteados[this.numerosSorteados.length - 1];
+    if (
+      ultimoNumeroSorteado.getAchado() &&
+      ultimoNumeroSorteado.getIndiceCampo() != -1
+    ) {
+      this.tabela.campos[
+        ultimoNumeroSorteado.getIndiceCampo()
+      ].atualizarMarcado(false);
     }
   }
 }

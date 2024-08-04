@@ -1,9 +1,10 @@
-import Campo from "./Campo";
+import Campo, { ValorCampo } from "./Campo";
 
 class Tabela {
   private readonly quantidadeColunas: number;
   private readonly quantidadeLinhas: number;
   public readonly campos: Campo[];
+  private tabelaValidada: boolean;
 
   constructor(quantidadeColunas: number, quantidadeLinhas: number) {
     Tabela.verificarQuantidadeColunas(quantidadeColunas);
@@ -11,6 +12,7 @@ class Tabela {
 
     this.quantidadeColunas = quantidadeColunas;
     this.quantidadeLinhas = quantidadeLinhas;
+    this.tabelaValidada = false;
 
     const numeroCampos = quantidadeColunas * quantidadeColunas;
     this.campos = Tabela.gerarTabelaInicial(numeroCampos);
@@ -25,8 +27,8 @@ class Tabela {
   public getQuantidadeLinhas(): number {
     return this.quantidadeLinhas;
   }
-  public getCampos(): Campo[] {
-    return this.campos;
+  public getTabelaValidada(): boolean {
+    return this.tabelaValidada;
   }
 
   /**
@@ -82,13 +84,48 @@ class Tabela {
   private static gerarTabelaInicial(numeroCampos: number): Campo[] {
     const novosCampos: Campo[] = [];
     for (let i = 0; i < numeroCampos; i++) {
-      novosCampos.push(new Campo(null, false));
+      novosCampos.push(new Campo(i, null, false));
     }
     return novosCampos;
   }
 
-  public getNumeroCamposJogo(): number {
+  public getQuantidadeCamposTabela(): number {
     return this.quantidadeColunas * this.quantidadeLinhas;
+  }
+
+  public validarTabela(): void {
+    for (let i = 0; i < this.getQuantidadeCamposTabela(); i++) {
+      if (!this.campos[i].verificarValorFinal()) {
+        throw new Error(
+          "Valor de um dos campos da tabela é inválido ou está vazio."
+        );
+      }
+    }
+    this.tabelaValidada = true;
+  }
+
+  private verificarSeValorJaExisteNaTabela(valor: ValorCampo) {
+    if (valor == null || valor == undefined || valor == "") {
+      return false;
+    }
+
+    for (let i = 0; i < this.getQuantidadeCamposTabela(); i++) {
+      if (
+        !this.campos[i].getNaoConsiderar() &&
+        this.campos[i].getValor() === valor
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public atualizarCampo(campoAtualizado: Campo) {
+    if (this.verificarSeValorJaExisteNaTabela(campoAtualizado.getValor())) {
+      throw new Error('Valor já existe na tabela.');
+    }
+    const indice = campoAtualizado.getIndice();
+    this.campos[indice] = campoAtualizado;
   }
 }
 
