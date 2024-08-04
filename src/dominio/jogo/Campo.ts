@@ -1,18 +1,19 @@
+import IndiceCampo from "./IndiceCampo";
+
 export type ValorCampo = number | string | null;
 
 class Campo {
-  private readonly indice: number;
+  private readonly indice: IndiceCampo;
   private valor: ValorCampo;
   private marcado: boolean;
   private considerar: boolean;
 
   public constructor(
-    indice: number,
+    indice: IndiceCampo,
     valor: ValorCampo,
     marcado: boolean = false,
     considerar = true
   ) {
-    Campo.verificarIndice(indice);
     Campo.verificarValorInicial(valor);
     Campo.verificarMarcado(marcado);
     Campo.verificarConsiderar(considerar);
@@ -38,11 +39,7 @@ class Campo {
     }
   }
 
-  private static verificarIndice(indice: number): void {
-    if (indice == null || indice === undefined || indice < 0) {
-      throw new Error("Atributo indice do campo não pode estar vazio.");
-    }
-  }
+  
   private static verificarMarcado(marcado: boolean): void {
     if (marcado == null || marcado === undefined) {
       throw new Error("Atributo marcado do campo não pode estar vazio.");
@@ -66,7 +63,7 @@ class Campo {
   public getConsiderar(): boolean {
     return this.considerar;
   }
-  public getIndice(): number {
+  public getIndice(): IndiceCampo {
     return this.indice;
   }
 
