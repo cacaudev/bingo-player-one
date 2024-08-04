@@ -19,6 +19,8 @@ class Jogo {
     Jogo.verificarNome(nomeJogo);
 
     this.nome = nomeJogo;
+    this.dataCriacao = new Date();
+
     this.tabela = new Tabela(quantidadeColunas, quantidadeLinhas);
     this.regras = new RegrasBingo();
     this.numerosSorteados = [];
