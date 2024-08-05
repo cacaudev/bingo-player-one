@@ -34,6 +34,7 @@ class RegrasBingo {
     if (regraAtualizada) {
       this.tabelaMarcada = false;
     }
+    this.validarRegras();
   }
   public atualizarColunaMarcada(regraAtualizada: boolean) {
     this.verificarRegra(regraAtualizada);
@@ -41,6 +42,7 @@ class RegrasBingo {
     if (regraAtualizada) {
       this.tabelaMarcada = false;
     }
+    this.validarRegras();
   }
   public atualizarTabelaMarcada(regraAtualizada: boolean) {
     this.verificarRegra(regraAtualizada);
@@ -49,6 +51,7 @@ class RegrasBingo {
       this.colunaMarcada = false;
       this.linhaMarcada = false;
     }
+    this.validarRegras();
   }
 
   private verificarRegra(regraAtualizada: boolean) {
@@ -56,6 +59,12 @@ class RegrasBingo {
       valor == null || valor == undefined;
     if (isVazio(regraAtualizada)) {
       throw new Error("Regra do jogo não pode ser vazia.");
+    }
+  }
+
+  public validarRegras() {
+    if (!this.colunaMarcada && !this.linhaMarcada && !this.tabelaMarcada) {
+      throw new Error('Pelo menos uma regra deve estar marcada.')
     }
   }
 }

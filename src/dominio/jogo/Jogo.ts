@@ -1,4 +1,3 @@
-import Campo from "./Campo";
 import IndiceCampo from "./IndiceCampo";
 import NumeroSorteado from "./NumeroSorteado";
 import RegrasBingo from "./RegrasBingo";
@@ -10,7 +9,9 @@ class Jogo {
 
   public readonly tabela: Tabela;
   public regras: RegrasBingo;
-  public numerosSorteados: NumeroSorteado[];
+  public numerosSorteados: NumeroSorteado[] = [];
+
+  private resultadoBingo: boolean = false;
 
   constructor(
     nomeJogo: string,
@@ -24,7 +25,6 @@ class Jogo {
 
     this.tabela = new Tabela(quantidadeColunas, quantidadeLinhas);
     this.regras = new RegrasBingo();
-    this.numerosSorteados = [];
   }
 
   /**
@@ -35,6 +35,9 @@ class Jogo {
   }
   public getDataCriacao(): Date {
     return this.dataCriacao;
+  }
+  public getResultadoBingo(): boolean {
+    return this.resultadoBingo;
   }
 
   /**
@@ -73,10 +76,12 @@ class Jogo {
   resetarJogo(): void {
     this.tabela.resetarMarcacaoDeTodosOsCampos();
     this.numerosSorteados = [];
+    this.resultadoBingo = false;
   }
 
-  validarTabelaParaIniciarJogo(): void {
+  validarTabelaERegrasParaIniciarJogo(): void {
     this.tabela.validarTabela();
+    this.regras.validarRegras();
   }
 
   adicionarNumeroSorteado(numeroSorteado: NumeroSorteado): void {
@@ -127,7 +132,11 @@ class Jogo {
     }
     this.adicionarNumeroSorteado(novoNumeroSorteado);
 
-    const considerouBingo: boolean = this.verificarSeBingo();
+    let considerouBingo: boolean = false;
+    if (numeroFoiAchadoNaTabela) {
+      considerouBingo = this.verificarSeBingo();
+      this.resultadoBingo = considerouBingo;
+    }
 
     return {
       foiBingo: considerouBingo,
@@ -190,12 +199,8 @@ class Jogo {
   }
 
   private verificarSeBingoPorColuna(): boolean {
-    let foiBingo: boolean = true;
-
-    /**
-     * Inicializa verificador de cada coluna como true
-     */
-    let colunas: boolean[] = [];
+    let foiBingo: boolean = false;
+    let colunasMarcadas: boolean[] = [];
 
     for (let j = 0; j < this.tabela.getQuantidadeColunas(); j++) {
       let colunaTodaMarcada = true;
@@ -207,17 +212,20 @@ class Jogo {
           }
         }
       }
-      colunas.push(colunaTodaMarcada);
+      colunasMarcadas.push(colunaTodaMarcada);
     }
 
-    if (colunas.filter((coluna) => !coluna).length > 0) {
-      foiBingo = false;
+    const peloMenosUmaLColunaMarcada = (colunas: boolean[]) =>
+      colunas.filter((coluna) => coluna).length > 0;
+
+    if (peloMenosUmaLColunaMarcada(colunasMarcadas)) {
+      foiBingo = true;
     }
     return foiBingo;
   }
 
   private verificarSeBingoPorLinha(): boolean {
-    let foiBingo: boolean = true;
+    let foiBingo: boolean = false;
     let linhasMarcadas: boolean[] = [];
 
     for (let i = 0; i < this.tabela.getQuantidadeLinhas(); i++) {
@@ -229,13 +237,15 @@ class Jogo {
             linhaTodaMarcada = false;
           }
         }
-
-        linhasMarcadas.push(linhaTodaMarcada);
       }
+      linhasMarcadas.push(linhaTodaMarcada);
     }
 
-    if (linhasMarcadas.filter((linha) => !linha).length > 0) {
-      foiBingo = false;
+    const peloMenosUmaLinhaMarcada = (linhas: boolean[]) =>
+      linhas.filter((linha) => linha).length > 0;
+
+    if (peloMenosUmaLinhaMarcada(linhasMarcadas)) {
+      foiBingo = true;
     }
     return foiBingo;
   }
