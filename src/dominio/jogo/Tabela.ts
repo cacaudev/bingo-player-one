@@ -125,7 +125,7 @@ class Tabela {
     for (let i = 0; i < this.getQuantidadeLinhas(); i++) {
       for (let j = 0; j < this.getQuantidadeColunas(); j++) {
         if (
-          !this.campos[i][j].getConsiderar() &&
+          this.campos[i][j].getConsiderar() &&
           this.campos[i][j].getValor() === valor
         ) {
           return true;
